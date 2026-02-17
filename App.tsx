@@ -7,6 +7,7 @@ import {
 } from './types';
 import { INITIAL_USERS, INITIAL_VEHICLES, INITIAL_CUSTOMERS } from './constants';
 import { Logo } from './components/UI';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { DriverLocationSender } from './components/DriverLocationSender';
 import { supabase, isSupabaseOnline } from './supabase';
 import { loadAllFromSupabase, syncAllToSupabase } from './supabase/sync';
@@ -458,14 +459,16 @@ const App: React.FC = () => {
       </header>
       {currentUser && <DriverLocationSender user={currentUser} />}
       <main className="flex-1 overflow-y-auto p-4 md:p-8 w-full">
-        <React.Suspense fallback={
-          <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <div className="text-[10px] font-black animate-pulse text-slate-600 uppercase tracking-[0.3em]">Carregando Sistemas...</div>
-          </div>
-        }>
-          {renderPage()}
-        </React.Suspense>
+        <ErrorBoundary onRetry={() => navigate('operation')}>
+          <React.Suspense fallback={
+            <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="text-[10px] font-black animate-pulse text-slate-600 uppercase tracking-[0.3em]">Carregando Sistemas...</div>
+            </div>
+          }>
+            {renderPage()}
+          </React.Suspense>
+        </ErrorBoundary>
       </main>
     </div>
   );

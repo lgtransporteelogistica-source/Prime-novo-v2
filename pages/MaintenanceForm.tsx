@@ -97,7 +97,7 @@ const MaintenanceForm: React.FC<MaintenanceFormProps> = ({ session, user, onSubm
             </div>
           </div>
 
-          <BigButton onClick={() => {}} disabled={!desc || !km}>
+          <BigButton type="submit" onClick={() => {}} disabled={!desc || !km}>
             ENVIAR SOLICITAÇÃO
           </BigButton>
         </form>

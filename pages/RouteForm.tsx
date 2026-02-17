@@ -76,7 +76,7 @@ const RouteForm: React.FC<RouteFormProps> = ({ session, user, drivers, customers
             Atenção: Registre a saída corretamente. O valor financeiro será atribuído pelo administrador na aba "Pendências &gt; Financeiro".
           </div>
 
-          <BigButton onClick={() => {}} disabled={!clienteId || !destino || !oc || !motoristaId}>INICIAR ROTA</BigButton>
+          <BigButton type="submit" onClick={() => {}} disabled={!clienteId || !destino || !oc || !motoristaId}>INICIAR ROTA</BigButton>
         </form>
       </Card>
     </div>
