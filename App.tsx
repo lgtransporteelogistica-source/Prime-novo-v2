@@ -200,21 +200,36 @@ const App: React.FC = () => {
     loadAllFromSupabase(supabase)
       .then((data) => {
         if (data) {
-          setUsers(data.users);
-          setVehicles(data.vehicles);
-          setCustomers(data.customers);
-          setFuelings(data.fuelings);
-          setMaintenances(data.maintenances);
-          setRoutes(data.routes);
-          setDailyRoutes(data.dailyRoutes);
-          setFixedExpenses(data.fixedExpenses);
-          setAgregados(data.agregados);
-          setAgregadoFreights(data.agregadoFreights);
-          setTolls(data.tolls);
-          setDbOnline(true);
+          const supabaseVazio =
+            !data.users.length && !data.vehicles.length && !data.customers.length &&
+            !data.fuelings.length && !data.maintenances.length && !data.routes.length &&
+            !data.dailyRoutes.length && !data.fixedExpenses.length && !data.agregados.length &&
+            !data.agregadoFreights.length && !data.tolls.length;
+
+          if (supabaseVazio) {
+            // Banco vazio: manter dados que já estão no app (localStorage) e marcar online;
+            // o efeito de persistência vai enviar esses dados para o Supabase.
+            setDbOnline(true);
+          } else {
+            setUsers(data.users);
+            setVehicles(data.vehicles);
+            setCustomers(data.customers);
+            setFuelings(data.fuelings);
+            setMaintenances(data.maintenances);
+            setRoutes(data.routes);
+            setDailyRoutes(data.dailyRoutes);
+            setFixedExpenses(data.fixedExpenses);
+            setAgregados(data.agregados);
+            setAgregadoFreights(data.agregadoFreights);
+            setTolls(data.tolls);
+            setDbOnline(true);
+          }
         }
       })
-      .catch(() => setDbOnline(false));
+      .catch((err) => {
+        console.error('[Prime] Erro ao conectar no Supabase:', err?.message || err);
+        setDbOnline(false);
+      });
   }, []);
 
   // Persistência: localStorage sempre; Supabase quando online
@@ -239,19 +254,20 @@ const App: React.FC = () => {
     }
   }, [users, vehicles, customers, fuelings, maintenances, routes, dailyRoutes, fixedExpenses, agregados, agregadoFreights, tolls, dbOnline]);
 
-  // Login Persistente
+  // Login Persistente: restaura sessão quando há user_id salvo; roda de novo quando users é preenchido (ex.: após carregar do Supabase)
   useEffect(() => {
+    if (currentUser) return;
     const savedUserId = localStorage.getItem('prime_group_user_id');
     const savedSession = localStorage.getItem('prime_group_session');
-    if (savedUserId) {
+    if (savedUserId && users.length) {
       const user = users.find(u => u.id === savedUserId);
       if (user && user.ativo) {
         setCurrentUser(user);
-        if (savedSession) setSession(JSON.parse(savedSession));
+        if (savedSession) try { setSession(JSON.parse(savedSession)); } catch { /* ignora sessão inválida */ }
         setCurrentPage('operation');
       }
     }
-  }, []);
+  }, [users, currentUser]);
 
   const navigate = (page: string) => {
     setCurrentPage(page);

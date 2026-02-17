@@ -25,14 +25,21 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
       const inputUser = username.trim().toLowerCase();
       const inputPass = password.trim();
 
+      if (!users.length) {
+        setError('Nenhum usuário carregado. Aguarde ou verifique a conexão.');
+        setIsLoading(false);
+        return;
+      }
+
       const user = users.find(u => {
-        const uNome = u.nome?.trim().toLowerCase();
-        const uEmail = u.email?.trim().toLowerCase();
+        const uNome = (u.nome ?? '').trim().toLowerCase();
+        const uEmail = (u.email ?? '').trim().toLowerCase();
         return (uNome === inputUser || uEmail === inputUser) && u.ativo;
       });
 
       if (user) {
-        if (user.senha === inputPass) {
+        const senhaSalva = (user.senha ?? '').trim();
+        if (senhaSalva === inputPass) {
           onLogin(user);
         } else {
           setError('Senha incorreta.');
@@ -79,9 +86,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
 
           <div className="pt-2">
             <BigButton 
+              type="submit"
               onClick={() => {}} 
               variant="primary" 
-              disabled={isLoading || !username || !password}
+              disabled={isLoading || !username.trim() || !password.trim()}
             >
               {isLoading ? 'VERIFICANDO...' : 'ENTRAR NO SISTEMA'}
             </BigButton>

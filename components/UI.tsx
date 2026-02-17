@@ -38,7 +38,8 @@ export const BigButton: React.FC<{
   icon?: React.ReactNode;
   disabled?: boolean;
   notificationCount?: number;
-}> = ({ onClick, children, variant = 'primary', icon, disabled, notificationCount }) => {
+  type?: 'button' | 'submit';
+}> = ({ onClick, children, variant = 'primary', icon, disabled, notificationCount, type = 'button' }) => {
   const styles = {
     primary: 'bg-blue-700 hover:bg-blue-600 border-blue-600 text-white shadow-blue-900/20',
     secondary: 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-100',
@@ -49,6 +50,7 @@ export const BigButton: React.FC<{
 
   return (
     <button 
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={`relative w-full p-6 text-sm font-black uppercase tracking-widest rounded-2xl border-b-4 flex flex-col items-center justify-center gap-4 transition-all active:translate-y-1 active:border-b-0 disabled:opacity-50 disabled:cursor-not-allowed ${styles[variant]}`}

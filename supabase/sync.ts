@@ -97,7 +97,7 @@ export async function loadAllFromSupabase(supabase: SupabaseClient): Promise<All
     };
   } catch (e) {
     console.error('loadAllFromSupabase:', e);
-    return null;
+    throw e;
   }
 }
 
