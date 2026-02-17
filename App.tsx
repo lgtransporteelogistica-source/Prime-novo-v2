@@ -384,7 +384,48 @@ const App: React.FC = () => {
       
       // Admin
       case 'admin-dashboard': return <AdminDashboard fuelings={fuelings} maintenances={maintenances} vehicles={vehicles} fixedExpenses={fixedExpenses} dailyRoutes={dailyRoutes} routes={routes} agregadoFreights={agregadoFreights} tolls={tolls} onBack={() => navigate('operation')} />;
-      case 'admin-pending': return <AdminPending fuelings={fuelings} maintenances={maintenances} dailyRoutes={dailyRoutes} routes={routes} vehicles={vehicles} users={users} currentUser={currentUser} onUpdateFueling={(id, up) => updateRecord(setFuelings, id, up)} onUpdateMaintenance={(id, up) => updateRecord(setMaintenances, id, up)} onUpdateDailyRoute={(id, up) => updateRecord(setDailyRoutes, id, up)} onUpdateRoute={(id, up) => updateRecord(setRoutes, id, up)} onDeleteFueling={(id) => deleteRecord(setFuelings, id)} onDeleteMaintenance={(id) => deleteRecord(setMaintenances, id)} onDeleteDailyRoute={(id) => deleteRecord(setDailyRoutes, id)} onDeleteRoute={(id) => deleteRecord(setRoutes, id)} onBack={() => navigate('operation')} />;
+      case 'admin-pending': return <AdminPending fuelings={fuelings} maintenances={maintenances} dailyRoutes={dailyRoutes} routes={routes} vehicles={vehicles} users={users} currentUser={currentUser}
+        onUpdateFueling={(id, up) => {
+          const next = fuelings.map(f => f.id === id ? { ...f, ...up } : f);
+          setFuelings(next);
+          if (supabase && dbOnline) syncAllToSupabase(supabase, { users, vehicles, customers, fuelings: next, maintenances, routes, dailyRoutes, fixedExpenses, agregados, agregadoFreights, tolls });
+        }}
+        onUpdateMaintenance={(id, up) => {
+          const next = maintenances.map(m => m.id === id ? { ...m, ...up } : m);
+          setMaintenances(next);
+          if (supabase && dbOnline) syncAllToSupabase(supabase, { users, vehicles, customers, fuelings, maintenances: next, routes, dailyRoutes, fixedExpenses, agregados, agregadoFreights, tolls });
+        }}
+        onUpdateDailyRoute={(id, up) => {
+          const next = dailyRoutes.map(d => d.id === id ? { ...d, ...up } : d);
+          setDailyRoutes(next);
+          if (supabase && dbOnline) syncAllToSupabase(supabase, { users, vehicles, customers, fuelings, maintenances, routes, dailyRoutes: next, fixedExpenses, agregados, agregadoFreights, tolls });
+        }}
+        onUpdateRoute={(id, up) => {
+          const next = routes.map(r => r.id === id ? { ...r, ...up } : r);
+          setRoutes(next);
+          if (supabase && dbOnline) syncAllToSupabase(supabase, { users, vehicles, customers, fuelings, maintenances, routes: next, dailyRoutes, fixedExpenses, agregados, agregadoFreights, tolls });
+        }}
+        onDeleteFueling={(id) => {
+          const next = fuelings.filter(f => f.id !== id);
+          setFuelings(next);
+          if (supabase && dbOnline) syncAllToSupabase(supabase, { users, vehicles, customers, fuelings: next, maintenances, routes, dailyRoutes, fixedExpenses, agregados, agregadoFreights, tolls });
+        }}
+        onDeleteMaintenance={(id) => {
+          const next = maintenances.filter(m => m.id !== id);
+          setMaintenances(next);
+          if (supabase && dbOnline) syncAllToSupabase(supabase, { users, vehicles, customers, fuelings, maintenances: next, routes, dailyRoutes, fixedExpenses, agregados, agregadoFreights, tolls });
+        }}
+        onDeleteDailyRoute={(id) => {
+          const next = dailyRoutes.filter(d => d.id !== id);
+          setDailyRoutes(next);
+          if (supabase && dbOnline) syncAllToSupabase(supabase, { users, vehicles, customers, fuelings, maintenances, routes, dailyRoutes: next, fixedExpenses, agregados, agregadoFreights, tolls });
+        }}
+        onDeleteRoute={(id) => {
+          const next = routes.filter(r => r.id !== id);
+          setRoutes(next);
+          if (supabase && dbOnline) syncAllToSupabase(supabase, { users, vehicles, customers, fuelings, maintenances, routes: next, dailyRoutes, fixedExpenses, agregados, agregadoFreights, tolls });
+        }}
+        onBack={() => navigate('operation')} />;
       case 'user-mgmt': return <UserManagement users={users} onSaveUser={onSaveUser} onBack={() => navigate('operation')} />;
       case 'vehicle-mgmt': return <VehicleManagement vehicles={vehicles} onSaveVehicle={onSaveVehicle} onUpdateVehicle={(id, up) => updateRecord(setVehicles, id, up)} onBack={() => navigate('operation')} />;
       case 'admin-customers': return <AdminCustomerManagement customers={customers} setCustomers={setCustomers} onBack={() => navigate('operation')} />;
