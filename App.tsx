@@ -235,17 +235,26 @@ const App: React.FC = () => {
 
   // Persistência: localStorage sempre; Supabase quando online
   useEffect(() => {
-    localStorage.setItem('pg_users', JSON.stringify(users));
-    localStorage.setItem('pg_vehicles', JSON.stringify(vehicles));
-    localStorage.setItem('pg_customers', JSON.stringify(customers));
-    localStorage.setItem('pg_fuelings', JSON.stringify(fuelings));
-    localStorage.setItem('pg_maintenances', JSON.stringify(maintenances));
-    localStorage.setItem('pg_routes', JSON.stringify(routes));
-    localStorage.setItem('pg_daily_routes', JSON.stringify(dailyRoutes));
-    localStorage.setItem('pg_fixed_expenses', JSON.stringify(fixedExpenses));
-    localStorage.setItem('pg_agregados', JSON.stringify(agregados));
-    localStorage.setItem('pg_agregado_freights', JSON.stringify(agregadoFreights));
-    localStorage.setItem('pg_tolls', JSON.stringify(tolls));
+    const setItem = (key: string, value: string) => {
+      try {
+        localStorage.setItem(key, value);
+      } catch (e) {
+        if ((e as DOMException)?.name === 'QuotaExceededError') {
+          console.warn('[Prime] localStorage cheio ao salvar', key);
+        }
+      }
+    };
+    setItem('pg_users', JSON.stringify(users));
+    setItem('pg_vehicles', JSON.stringify(vehicles));
+    setItem('pg_customers', JSON.stringify(customers));
+    setItem('pg_fuelings', JSON.stringify(fuelings));
+    setItem('pg_maintenances', JSON.stringify(maintenances));
+    setItem('pg_routes', JSON.stringify(routes));
+    setItem('pg_daily_routes', JSON.stringify(dailyRoutes));
+    setItem('pg_fixed_expenses', JSON.stringify(fixedExpenses));
+    setItem('pg_agregados', JSON.stringify(agregados));
+    setItem('pg_agregado_freights', JSON.stringify(agregadoFreights));
+    setItem('pg_tolls', JSON.stringify(tolls));
 
     if (supabase && dbOnline) {
       syncAllToSupabase(supabase, {
@@ -359,7 +368,15 @@ const App: React.FC = () => {
       case 'fueling': return <FuelingForm session={session!} user={currentUser} onBack={() => navigate('operation')} onSubmit={(f) => { saveRecord(setFuelings, f); navigate('operation'); }} />;
       case 'maintenance': return <MaintenanceForm session={session!} user={currentUser} onBack={() => navigate('operation')} onSubmit={(m) => { saveRecord(setMaintenances, m); navigate('operation'); }} />;
       case 'route': return <RouteForm session={session!} user={currentUser} drivers={users.filter(u => u.perfil === UserRole.MOTORISTA)} customers={customers} onBack={() => navigate('operation')} onSubmit={(r) => { saveRecord(setRoutes, r); navigate('operation'); }} />;
-      case 'daily-route': return <DriverDailyRoute session={session!} user={currentUser} customers={customers} onBack={() => navigate('operation')} onSubmit={(dr) => { saveRecord(setDailyRoutes, dr); navigate('operation'); }} />;
+      case 'daily-route': return <DriverDailyRoute session={session!} user={currentUser} customers={customers} onBack={() => navigate('operation')} onSubmit={(dr) => {
+        try {
+          saveRecord(setDailyRoutes, dr);
+          setTimeout(() => navigate('operation'), 50);
+        } catch (e) {
+          console.error('[Prime] Erro ao salvar rota do dia:', e);
+          setTimeout(() => navigate('operation'), 50);
+        }
+      }} />;
       case 'helper-binding': return <HelperRouteBinding session={session!} user={currentUser} dailyRoutes={dailyRoutes} users={users} onBack={() => navigate('operation')} onBind={(rId) => { updateRecord(setDailyRoutes, rId, { ajudanteId: currentUser.id, ajudanteNome: currentUser.nome }); navigate('operation'); }} />;
       case 'select-vehicle': return <VehicleSelection vehicles={vehicles} onSelect={(vId, pl) => { const s = { userId: currentUser.id, vehicleId: vId, placa: pl, updatedAt: new Date().toISOString() }; setSession(s); localStorage.setItem('prime_group_session', JSON.stringify(s)); navigate('operation'); }} onBack={() => navigate('operation')} />;
       case 'my-requests': return <MyRequests fuelings={fuelings.filter(f => f.motoristaId === currentUser.id)} maintenances={maintenances.filter(m => m.motoristaId === currentUser.id)} onBack={() => navigate('operation')} />;
